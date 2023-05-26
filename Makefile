@@ -4,25 +4,22 @@ ifneq (,$(wildcard ./.env))
 	export
 endif
 
-DOCKER_EXEC = docker run \
-				-u $(shell id -u):$(shell id -g) \
-				--rm \
-				-v $(PWD):/opt \
-				$(DOCKER_HUB_REPO):latest
+DOCKER_COMPOSE = 	DOCKER_HUB_REPO=$(DOCKER_HUB_REPO) \
+				 	BUILD_ID=$(shell date +%s) \
+					docker-compose -f docker/docker-compose.yml 
 
 ## App commands
 run:
-	@$(DOCKER_EXEC) python3 /opt/app/helloworld.py
+	@UIDGID=$(shell id -u):$(shell id -g) $(DOCKER_COMPOSE) run app whoami
 .PHONEY: run
 
 debug:
-	@docker run \
-				-u $(shell id -u):$(shell id -g) \
-				-it \
-				--rm \
-				-v $(PWD):/opt \
-				$(DOCKER_HUB_REPO):latest /bin/bash
+	@UIDGID=$(shell id -u):$(shell id -g) $(DOCKER_COMPOSE) run -it app /bin/bash
 .PHONEY: debug
+
+debug_root:
+	@$(DOCKER_COMPOSE) run -it app /bin/bash
+.PHONEY: debug_root
 
 ## Build Agent Commands
 # build

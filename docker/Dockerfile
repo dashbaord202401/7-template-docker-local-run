@@ -15,6 +15,27 @@ RUN addgroup ${USERNAME} root
 RUN python3 -m pip install ansible==2.10.7 \
     && python3 -m pip install ansible-vault
 
+## install docker
+RUN apt update && apt-get install -y \
+    systemctl \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
+
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+RUN echo \
+  "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+RUN apt update && apt install -y \
+    docker-ce-cli
+
+## install other system packages
+RUN apt install -y vim
+
+
 
 USER ${USERNAME}
 ### ssh configs

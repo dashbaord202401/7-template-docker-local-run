@@ -1,38 +1,15 @@
+---
+# Docker outside of docker
+
 version: '3.7'
 
-
 services:
-  docker:
-    image: docker:18-dind
-    container_name: docker-18-dind
-    privileged: true
-    expose:
-        - 2375
-        - 2376
-    volumes:
-      - dind-certs-ca:/certs/ca
-      - dind-certs-client:/certs/client
-
-
   app:
     image: ${DOCKER_HUB_REPO}
     container_name: app-${BUILD_ID}
-    depends_on:
-      - docker
-    links:
-      - docker
     user: "${UIDGID}"
-    environment:
-      DOCKER_TLS_CERTDIR: "/certs"
-      DOCKER_HOST: tcp://docker:2375
-      DOCKER_AUTH_CONFIG: "{\"credsStore\": \"ecr-login\"}"
     env_file: ../.env
     working_dir: /opt
     volumes:
       - ..:/opt
-      - dind-certs-client:/certs/client:ro
-
-
-volumes:
-  dind-certs-ca:
-  dind-certs-client:
+      - /var/run/docker.sock:/var/run/docker.sock
